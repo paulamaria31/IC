@@ -24,8 +24,8 @@ from tensorflow.keras.callbacks import ReduceLROnPlateau, ModelCheckpoint ##
 import zipfile
 import os
 
-folder_path = './dataset/Dataset_CSV/' 
-processed_data_path = './'
+folder_path = '/media/work/mariapaula/IC/ModeloMixado/dataset/Dataset_CSV/'
+processed_data_path = '/media/work/mariapaula/IC/ModeloMixado/'
 
 if not os.path.exists(os.path.join(processed_data_path, 'results')):
     os.makedirs(os.path.join(processed_data_path, 'results'), exist_ok=True)
@@ -150,8 +150,7 @@ opt = SGD(learning_rate = initial_learning_rate, momentum = 0.9)
 # Cria callback, chama uma funcao que diminui a taxa de aprendizado
 lr_scheduler = LearningRateScheduler(models.scheduler, verbose = 0)
 # Salva os pesos a cada 5 epócas nesse arquivo
-saver = models.SaveAtEpochEnd(5, 'model_weights')
-# apenas cria a variavel model
+saver = models.SaveAtEpochEnd(5, '/media/work/mariapaula/IC/ModeloMixado/model_weights')# apenas cria a variavel model
 model = None
 
 # Não usando o data generator
@@ -228,7 +227,7 @@ if(not args.datagen):
         print("Loss difference : {:.4f}\n".format((max_loss - min_loss)))
 
         # Salvo o modelo no arquivo .h5
-        model.save('./model_weights.h5')
+        model.save('/media/work/mariapaula/IC/ModeloMixado/model_weights.h5')
         print('model was saved to model_weights.h5.\n')
 
     # Executa o modo de identificação, para ver o quão bem a rede consegue classificar sinais EEG após o treinamento,
