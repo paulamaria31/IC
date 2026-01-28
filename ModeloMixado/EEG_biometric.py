@@ -24,8 +24,8 @@ from tensorflow.keras.callbacks import ReduceLROnPlateau, ModelCheckpoint ##
 import zipfile
 import os
 
-folder_path = '/media/work/mariapaula/IC/ModeloMixado/Dataset_CSV/'
-processed_data_path = '/media/work/mariapaula/IC/ModeloMixado/'
+folder_path = './dataset/Dataset_CSV/' 
+processed_data_path = './'
 
 if not os.path.exists(os.path.join(processed_data_path, 'results')):
     os.makedirs(os.path.join(processed_data_path, 'results'), exist_ok=True)
@@ -228,7 +228,7 @@ if(not args.datagen):
         print("Loss difference : {:.4f}\n".format((max_loss - min_loss)))
 
         # Salvo o modelo no arquivo .h5
-        model.save('model_weights.h5')
+        model.save('./model_weights.h5')
         print('model was saved to model_weights.h5.\n')
 
     # Executa o modo de identificação, para ver o quão bem a rede consegue classificar sinais EEG após o treinamento,

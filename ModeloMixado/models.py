@@ -295,9 +295,9 @@ def create_model_mixed(window_size, num_channels, num_classes, remove_last_layer
     
     # Parte 4: Classificação (Suavizada para evitar underfitting)
     x = Flatten()(x)
-    x = Dense(512, activation='relu')(x)
+    x = Dense(128, activation='relu')(x)
     x = Dropout(0.3)(x) # Reduzido de 0.5 para 0.3 para permitir fluxo de informação
-    x = Dense(128, name='FC3')(x) # Aumentado de 64 para 128 neurônios
+    x = Dense(64, name='FC3')(x) # Aumentado de 64 para 128 neurônios
     x = BatchNormalization()(x)
 
     if not remove_last_layer:
