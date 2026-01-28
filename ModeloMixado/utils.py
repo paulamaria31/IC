@@ -84,23 +84,15 @@ def verbose_each_10_percent(count, data_amount, flag):
     return flag
     
 def one_hot_encoding_to_classes(y_data):
-    """
-    Takes a 2D numpy array that contains one-hot encoded labels and returns a 1D numpy array that contains
-    the classes.
-
-    Parameters:
-        - y_data: 2D numpy array in the format (number of samples, number of classes).
-    """
-
     i = 0
-    j = 0
     num_samples = y_data.shape[0]
     arr = np.zeros(shape=(num_samples, 1))
 
     while i < num_samples:
+        j = 0  # <--- CORREÇÃO: j deve ser zerado para cada nova linha
         while y_data[i, j] != 1:
             j += 1
-        arr[i] = j+1
+        arr[i] = j + 1
         i += 1
     
     return arr
