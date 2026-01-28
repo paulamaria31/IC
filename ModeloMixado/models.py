@@ -9,16 +9,14 @@ from tensorflow.keras.callbacks import Callback
 
 #Defino o learning rate por epocas
 def scheduler(current_epoch, learning_rate):
-    #Fixa o learning rate nas epocas 0 e 1 para 0.01
-    if current_epoch < 2:
-        learning_rate = 0.01
-    #Da 2 ate 36 cai para 0.001
-    elif current_epoch < 37:
-        learning_rate = 0.001
-    #De 37 ate 0 40 cai para 0.0001
+    # Mantém 0.01 por mais tempo (até a época 20) para dar "tração"
+    if current_epoch < 20:
+        return 0.01
+    # Reduz para 0.005 para refinar
+    elif current_epoch < 35:
+        return 0.005
     else:
-        learning_rate = 0.0001
-    return learning_rate
+        return 0.001
 
 #Mostra o valor do learning rate atual
 def get_lr_metric(optimizer):
@@ -284,28 +282,29 @@ def create_model_mixed(window_size, num_channels, num_classes, remove_last_layer
     x = LSTM(64, return_sequences=True)(inputs)
     x = Conv1D(96, (11), activation='relu', padding='same')(x)
     x = BatchNormalization()(x)
-    x = MaxPooling1D(strides=4)(x) # Reduz para 480 pontos
+    x = MaxPooling1D(strides=4)(x) # Reduz a sequência temporal para 480 pontos
 
-    # Parte 2: Atenção com 4 cabeças (Agora cabe na memória!)
+    # Parte 2: Atenção com 4 cabeças (Otimizado para memória GPU)
     attention_output = MultiHeadAttention(num_heads=4, key_dim=64)(x, x)
     x = LayerNormalization()(attention_output + x)
 
-    # Parte 3: Classificação
+    # Parte 3: Extração de características espaciais final
     x = Conv1D(128, (9), activation='relu', padding='same')(x)
     x = BatchNormalization()(x)
     x = MaxPooling1D(strides=2)(x)
     
+    # Parte 4: Classificação (Suavizada para evitar underfitting)
     x = Flatten()(x)
     x = Dense(512, activation='relu')(x)
-    x = Dropout(0.5)(x)
-    x = Dense(256, name='FC3')(x)
+    x = Dropout(0.3)(x) # Reduzido de 0.5 para 0.3 para permitir fluxo de informação
+    x = Dense(128, name='FC3')(x) # Aumentado de 64 para 128 neurônios
     x = BatchNormalization()(x)
 
     if not remove_last_layer:
-        x = Dropout(0.3)(x)
+        x = Dropout(0.3)(x) # Dropout final moderado
         outputs = Dense(num_classes, activation='softmax', name='FC4')(x)
     else:
-        outputs = x 
+        outputs = x # Modo de Verificação (Extração de Features)
 
     return Model(inputs=inputs, outputs=outputs, name='Mixed_Attention_Model')
 
