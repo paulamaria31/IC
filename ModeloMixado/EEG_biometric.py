@@ -21,13 +21,11 @@ from numpy import savetxt, loadtxt
 from tensorflow.keras.optimizers import Adam ##
 from tensorflow.keras.callbacks import ReduceLROnPlateau, ModelCheckpoint ##
 
-# Conecta ao drive
-from google.colab import drive
 import zipfile
 import os
 
-folder_path = '/content/dataset/Dataset_CSV/'
-processed_data_path = '/content/'
+folder_path = '/media/work/mariapaula/IC/ModeloMixado/Dataset_CSV/'
+processed_data_path = '/media/work/mariapaula/IC/ModeloMixado/'
 
 if not os.path.exists(os.path.join(processed_data_path, 'results')):
     os.makedirs(os.path.join(processed_data_path, 'results'), exist_ok=True)
