@@ -149,8 +149,18 @@ class DataGenerator(keras.utils.Sequence):
 
         for crop_position in crop_positions:
             file_index, crop_end = crop_position
+            # Recorta a janela de sinal
             sample = self.data[file_index][:, (crop_end-self.dim):crop_end]
             sample = sample.reshape(sample.shape[1], sample.shape[0])
+
+            # --- ADICIONAR ESTE BLOCO PARA RUÍDO ---
+            if self.train:
+                # np.random.normal(média, desvio_padrão, formato)
+                # O valor 0.01 define a força do ruído; comece baixo.
+                noise = np.random.normal(0, 0.01, sample.shape)
+                sample = sample + noise
+            # --------------------------------------
+
             x.append(sample)
 
             label = np.zeros((1, self.n_classes))
