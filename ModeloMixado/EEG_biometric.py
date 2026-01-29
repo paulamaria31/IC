@@ -149,17 +149,18 @@ opt = SGD(learning_rate = initial_learning_rate, momentum = 0.9)
 # Cria callback, chama uma funcao que diminui a taxa de aprendizado
 lr_scheduler = LearningRateScheduler(models.scheduler, verbose = 0)
 # Salva os pesos a cada 5 epócas nesse arquivo
-saver = models.SaveAtEpochEnd(5, '/media/work/mariapaula/IC/ModeloMixado/model_weights')# apenas cria a variavel model
+saver = models.SaveAtEpochEnd(5, '/media/work/mariapaula/IC/ModeloMixado/model_weights')
+# apenas cria a variavel model
 model = None
 
-# Não usando o data generator
+# Não usando o data generator (ou seja, nao digitei o --datagen, que é os casos atuais)
 if(not args.datagen):
     # Carrega o conteudo de treino e teste, dentro do caminho e o numero 1 mostra o progresso
     train_content, test_content = loader.load_data(folder_path, train_tasks, test_tasks, 'csv', num_classes, 1)   
 
     # Filtrando o conteudo de teste e treino com passa banda 3
-    train_content = preprocessing.filter_data(train_content, band_pass_3, sample_frequency, filter_order, filter_type, 1)
-    test_content = preprocessing.filter_data(test_content, band_pass_3, sample_frequency, filter_order, filter_type, 1)
+    train_content = preprocessing.filter_data(train_content, band_pass_2, sample_frequency, filter_order, filter_type, 1)
+    test_content = preprocessing.filter_data(test_content, band_pass_2, sample_frequency, filter_order, filter_type, 1)
 
     # Normaliza os dados
     train_content = preprocessing.normalize_data(train_content, 'sun', 1)
@@ -170,7 +171,7 @@ if(not args.datagen):
                                                                 window_size, offset, split_ratio)
     x_test, y_test = data_manipulation.crop_data(test_content, test_tasks, num_classes, window_size, window_size)
 
-    # Verifica se nao usou o nofit, se tiver usado pula direto para a fase de teste
+    # Verifica se nao usou o nofit (crio modelo novo) se tiver usado pula direto para os pesos ja pronto
     if(not args.nofit):
 
         # Criando o modelo mixado
@@ -259,22 +260,22 @@ if(not args.datagen):
         print(f'Evaluating on testing set time in minutes: {(test_end - test_begin)/60.0}\n')
 
     # Começa o modo de verificação
-    #if(not args.novmode):
+    if(not args.novmode):
 
         # Recria o modelo
-      #  model_for_verification = models.create_model_mixed(window_size, num_channels, num_classes, True)
-       # model_for_verification.summary()
-        #model_for_verification.compile(opt, loss='categorical_crossentropy', metrics=['accuracy'])
+        model_for_verification = models.create_model_mixed(window_size, num_channels, num_classes, True)
+        model_for_verification.summary()
+        model_for_verification.compile(opt, loss='categorical_crossentropy', metrics=['accuracy'])
         # Carrega os pesos treinados para esse novo modelo
-      #  model_for_verification.load_weights('model_weights.h5', by_name=True)
+        model_for_verification.load_weights('model_weights.h5', by_name=True)
 
-       # x_pred = model_for_verification.predict(x_test, batch_size = batch_size)
+        x_pred = model_for_verification.predict(x_test, batch_size = batch_size)
 
         # Calcula as metricas biometricas
-       # y_test_classes = utils.one_hot_encoding_to_classes(y_test)
-      #  d, eer, thresholds = utils.calc_metrics(x_pred, y_test_classes, x_pred, y_test_classes)
-       # print(f'EER: {eer*100.0} %')
-       # print(f'Decidability: {d}')
+        y_test_classes = utils.one_hot_encoding_to_classes(y_test)
+        d, eer, thresholds = utils.calc_metrics(x_pred, y_test_classes, x_pred, y_test_classes)
+        print(f'EER: {eer*100.0} %')
+        print(f'Decidability: {d}')
 
 # Usando o data generators
 else:

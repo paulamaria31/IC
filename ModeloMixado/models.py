@@ -278,26 +278,22 @@ def create_model_GRU(window_size, num_channels, num_classes, remove_last_layer=F
 def create_model_mixed(window_size, num_channels, num_classes, remove_last_layer=False):
     inputs = Input(shape=(window_size, num_channels))
 
-    # Parte 1: Extração inicial e redução de tamanho
     x = LSTM(64, return_sequences=True)(inputs)
     x = Conv1D(96, (11), activation='relu', padding='same')(x)
     x = BatchNormalization()(x)
     x = MaxPooling1D(strides=4)(x) # Reduz a sequência temporal para 480 pontos
 
-    # Parte 2: Atenção com 4 cabeças (Otimizado para memória GPU)
     attention_output = MultiHeadAttention(num_heads=4, key_dim=64)(x, x)
     x = LayerNormalization()(attention_output + x)
 
-    # Parte 3: Extração de características espaciais final
     x = Conv1D(128, (9), activation='relu', padding='same')(x)
     x = BatchNormalization()(x)
     x = MaxPooling1D(strides=2)(x)
     
-    # Parte 4: Classificação (Suavizada para evitar underfitting)
     x = Flatten()(x)
-    x = Dense(128, activation='relu')(x)
-    x = Dropout(0.5)(x) # Reduzido de 0.5 para 0.3 para permitir fluxo de informação
-    x = Dense(32, name='FC3')(x) # Aumentado de 64 para 128 neurônios
+    x = Dense(64, activation='relu')(x)
+    x = Dropout(0.5)(x) 
+    x = Dense(16, name='FC3')(x)
     x = BatchNormalization()(x)
 
     if not remove_last_layer:
