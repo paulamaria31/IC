@@ -171,7 +171,7 @@ if(not args.datagen):
                                                                 window_size, offset, split_ratio)
     x_test, y_test = data_manipulation.crop_data(test_content, test_tasks, num_classes, window_size, window_size)
 
-    # Verifica se nao usou o nofit (crio modelo novo) se tiver usado pula direto para os pesos ja pronto
+    # Verifica se nao usou o nofit ou seja digitei --nofit (crio modelo novo) se tiver usado pula direto para os pesos ja pronto
     if(not args.nofit):
 
         # Criando o modelo mixado
@@ -230,7 +230,7 @@ if(not args.datagen):
         model.save('/media/work/mariapaula/IC/ModeloMixado/model_weights.h5')
         print('model was saved to model_weights.h5.\n')
 
-    # Executa o modo de identificação, para ver o quão bem a rede consegue classificar sinais EEG após o treinamento,
+    # Executa o modo de identificação, ou seja, nao digitei --noimode para ver o quão bem a rede consegue classificar sinais EEG após o treinamento,
     if(not args.noimode):
 
         # Verifica se nao pulou o treino
@@ -259,7 +259,7 @@ if(not args.datagen):
         print(f'Evaluating on testing set time in seconds: {test_end - test_begin}')
         print(f'Evaluating on testing set time in minutes: {(test_end - test_begin)/60.0}\n')
 
-    # Começa o modo de verificação
+    # Começa o modo de verificação, ou seja nao digitei --novmode
     if(not args.novmode):
 
         # Recria o modelo
@@ -284,7 +284,7 @@ else:
     train_content, test_content = loader.load_data(folder_path, train_tasks, test_tasks, 'csv', total_subjects)   
 
     # Filtro
-    test_content = preprocessing.filter_data(test_content, band_pass_3, sample_frequency, filter_order, filter_type)
+    test_content = preprocessing.filter_data(test_content, band_pass_2, sample_frequency, filter_order, filter_type)
 
     # Normalizo
     test_content = preprocessing.normalize_data(test_content, 'sun')
@@ -333,7 +333,7 @@ else:
     validation_generator = data_manipulation.DataGenerator(x_train_list, batch_size, window_size, offset,
         num_channels, num_classes, train_tasks, 'validation', split_ratio, processed_data_path, True)
 
-    # Verifica se nao usou o nofit, se tiver usado pula direto para a fase de teste
+    # Verifica se nao usou o nofit, ou seja se eu digitei --nofit vai usar o modelo com pesos prontos
     if(not args.nofit):
         model = models.create_model_mixed(window_size, num_channels, num_classes)
         # model = models.create_model_causal(window_size, num_channels, num_classes) ##
@@ -348,7 +348,7 @@ else:
         # reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5, patience=50, min_lr=0.0001) ##
         # model_checkpoint = ModelCheckpoint(filepath='resnet1d_best_model.hdf5', monitor='loss',
         #                                     save_best_only=True) ##
-        early_stop = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
+        early_stop = EarlyStopping(monitor='val_loss', patience=15, restore_best_weights=True)
         # Resultado
         results = model.fit(training_generator,
                             validation_data = validation_generator,
@@ -391,7 +391,7 @@ else:
         model.save('model_weights.h5')
         print('model was saved to model_weights.h5.\n')
 
-    # Executa o modo de identificação, para ver o quão bem a rede consegue classificar sinais EEG após o treinamento,
+    # Executa o modo de identificação, ou seja se eu nao digitei --noimode eu estou usando
     if(not args.noimode):
 
         # Se for nenhum eu crio
@@ -421,17 +421,17 @@ else:
         print(f'Evaluating on testing set time in seconds: {test_end - test_begin}')
         print(f'Evaluating on testing set time in minutes: {(test_end - test_begin)/60.0}\n')
     
-    # Começa o modo de verificação
-   # if(not args.novmode):
+    # Executa o modo de verificacao, ou seja se eu nao digitei --novmode eu estou usando
+    if(not args.novmode):
 
-     #   model_for_verification = models.create_model_mixed(window_size, num_channels, num_classes, True) ##
-     #   model_for_verification.summary()
-      #  model_for_verification.compile(opt, loss='categorical_crossentropy', metrics=['accuracy'])
-      #  model_for_verification.load_weights('model_weights.h5', by_name=True)
+        model_for_verification = models.create_model_mixed(window_size, num_channels, num_classes, True) ##
+        model_for_verification.summary()
+        model_for_verification.compile(opt, loss='categorical_crossentropy', metrics=['accuracy'])
+        model_for_verification.load_weights('model_weights.h5', by_name=True)
 
-      #  x_pred = model_for_verification.predict(x_test, batch_size = batch_size)
+        x_pred = model_for_verification.predict(x_test, batch_size = batch_size)
 
-       # y_test_classes = utils.one_hot_encoding_to_classes(y_test)
-       # d, eer, thresholds = utils.calc_metrics(x_pred, y_test_classes, x_pred, y_test_classes)
-       # print(f'EER: {eer * 100.0} %')
-        #print(f'Decidability: {d}')
+        y_test_classes = utils.one_hot_encoding_to_classes(y_test)
+        d, eer, thresholds = utils.calc_metrics(x_pred, y_test_classes, x_pred, y_test_classes)
+        print(f'EER: {eer * 100.0} %')
+        print(f'Decidability: {d}')

@@ -6,11 +6,12 @@ from tensorflow.keras import Input, Model
 from tensorflow import transpose, reshape, split
 from tensorflow.keras.layers import LSTMCell, StackedRNNCells
 from tensorflow.keras.callbacks import Callback
+from tensorflow.keras.regularizers import l2
 
 #Defino o learning rate por epocas
 def scheduler(current_epoch, learning_rate):
     # Mantém 0.01 por mais tempo (até a época 20) para dar "tração"
-    if current_epoch < 20:
+    if current_epoch < 25:
         return 0.01
     # Reduz para 0.005 para refinar
     elif current_epoch < 35:
@@ -291,9 +292,9 @@ def create_model_mixed(window_size, num_channels, num_classes, remove_last_layer
     x = MaxPooling1D(strides=2)(x)
     
     x = Flatten()(x)
-    x = Dense(64, activation='relu')(x)
+    x = Dense(64, activation='relu', kernel_regularizer=l2(0.01))(x)
     x = Dropout(0.5)(x) 
-    x = Dense(16, name='FC3')(x)
+    x = Dense(16, name='FC3', kernel_regularizer=l2(0.01))(x)
     x = BatchNormalization()(x)
 
     if not remove_last_layer:
