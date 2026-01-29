@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 from pathlib import Path
 from tensorflow.keras.callbacks import LearningRateScheduler
+from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.optimizers import SGD
 from numpy import savetxt, loadtxt
 
@@ -351,12 +352,12 @@ else:
         # reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5, patience=50, min_lr=0.0001) ##
         # model_checkpoint = ModelCheckpoint(filepath='resnet1d_best_model.hdf5', monitor='loss',
         #                                     save_best_only=True) ##
-        
+        early_stop = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
         # Resultado
         results = model.fit(training_generator,
                             validation_data = validation_generator,
                             epochs = training_epochs,
-                            callbacks = [lr_scheduler, saver]
+                            callbacks = [lr_scheduler, saver, early_stop]
                             # callbacks = [reduce_lr, model_checkpoint] ##
                             )
 
