@@ -124,15 +124,16 @@ class DataGenerator(keras.utils.Sequence):
         data = []
         classes_list = [] # Armazena se é Classe 1 ou 2
 
-        for task in self.tasks:
-            # No novo cenário, assumimos que list_files segue a ordem R01, R02...
-            for i, file_name in enumerate(list_files):
+        # No __init__ do DataGenerator:
+        for task_idx, task in enumerate(self.tasks):
+            for file_name in list_files:
                 path = f"{processed_data_path}processed_data/task{task}/{file_name}"
                 file_x = np.loadtxt(path, delimiter=';').astype('float32')
                 data.append(file_x)
-                # Classe baseada na ordem do arquivo
-                c = 1 if (i % 2 == 0) else 2
-                classes_list.append(c)
+                
+                # task_idx será 0 para a primeira tarefa (R01 - Olho Aberto) 
+                # e 1 para a segunda (R02 - Olho Fechado)
+                classes_list.append(task_idx + 1)
 
         signal_sizes = [signal.shape[1] for signal in data]
         self.crop_positions = get_crop_positions(self.dataset_type, signal_sizes, self.dim, self.offset, self.split_ratio)

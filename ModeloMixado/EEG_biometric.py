@@ -47,8 +47,6 @@ initial_learning_rate = 0.01
 num_classes = 2
 # Sujeitos de treino
 training_subjects_end = 70
-# Sujeitos de testes
-test_subjects = range(71, 110)
 # Total de sujeitos
 total_subjects = 109  
 
@@ -261,28 +259,28 @@ if(not args.datagen):
         print(f'Evaluating on testing set time in minutes: {(test_end - test_begin)/60.0}\n')
 
     # Começa o modo de verificação
-    if(not args.novmode):
+    #if(not args.novmode):
 
         # Recria o modelo
-        model_for_verification = models.create_model_mixed(window_size, num_channels, num_classes, True)
-        model_for_verification.summary()
-        model_for_verification.compile(opt, loss='categorical_crossentropy', metrics=['accuracy'])
+      #  model_for_verification = models.create_model_mixed(window_size, num_channels, num_classes, True)
+       # model_for_verification.summary()
+        #model_for_verification.compile(opt, loss='categorical_crossentropy', metrics=['accuracy'])
         # Carrega os pesos treinados para esse novo modelo
-        model_for_verification.load_weights('model_weights.h5', by_name=True)
+      #  model_for_verification.load_weights('model_weights.h5', by_name=True)
 
-        x_pred = model_for_verification.predict(x_test, batch_size = batch_size)
+       # x_pred = model_for_verification.predict(x_test, batch_size = batch_size)
 
         # Calcula as metricas biometricas
-        y_test_classes = utils.one_hot_encoding_to_classes(y_test)
-        d, eer, thresholds = utils.calc_metrics(x_pred, y_test_classes, x_pred, y_test_classes)
-        print(f'EER: {eer*100.0} %')
-        print(f'Decidability: {d}')
+       # y_test_classes = utils.one_hot_encoding_to_classes(y_test)
+      #  d, eer, thresholds = utils.calc_metrics(x_pred, y_test_classes, x_pred, y_test_classes)
+       # print(f'EER: {eer*100.0} %')
+       # print(f'Decidability: {d}')
 
 # Usando o data generators
 else:
 
     # Carrego os dados
-    train_content, test_content = loader.load_data(folder_path, train_tasks, test_tasks, 'csv', num_classes)   
+    train_content, test_content = loader.load_data(folder_path, train_tasks, test_tasks, 'csv', total_subjects)   
 
     # Filtro
     test_content = preprocessing.filter_data(test_content, band_pass_3, sample_frequency, filter_order, filter_type)
@@ -324,12 +322,9 @@ else:
 
     # Crio lista para armazenar o caminho de todos os arquivos de todas as tarefas
     x_train_list = []
-    
-    # Coloco o nome nas listas
-    for task in train_tasks:
-        x_train_list.append(loadtxt(processed_data_path + 'processed_data/task'+str(task)+'/x_list.csv', delimiter=',', dtype='str'))
-
-    x_train_list = [item for sublist in x_train_list for item in sublist]
+    for subject_idx in range(1, training_subjects_end + 1):
+        for task in train_tasks:
+            x_train_list.append(f'x_subject_{subject_idx}.csv')
 
     # Defino o data generator de treino e validacao
     training_generator = data_manipulation.DataGenerator(x_train_list, batch_size, window_size, offset,
@@ -426,16 +421,16 @@ else:
         print(f'Evaluating on testing set time in minutes: {(test_end - test_begin)/60.0}\n')
     
     # Começa o modo de verificação
-    if(not args.novmode):
+   # if(not args.novmode):
 
-        model_for_verification = models.create_model_mixed(window_size, num_channels, num_classes, True) ##
-        model_for_verification.summary()
-        model_for_verification.compile(opt, loss='categorical_crossentropy', metrics=['accuracy'])
-        model_for_verification.load_weights('model_weights.h5', by_name=True)
+     #   model_for_verification = models.create_model_mixed(window_size, num_channels, num_classes, True) ##
+     #   model_for_verification.summary()
+      #  model_for_verification.compile(opt, loss='categorical_crossentropy', metrics=['accuracy'])
+      #  model_for_verification.load_weights('model_weights.h5', by_name=True)
 
-        x_pred = model_for_verification.predict(x_test, batch_size = batch_size)
+      #  x_pred = model_for_verification.predict(x_test, batch_size = batch_size)
 
-        y_test_classes = utils.one_hot_encoding_to_classes(y_test)
-        d, eer, thresholds = utils.calc_metrics(x_pred, y_test_classes, x_pred, y_test_classes)
-        print(f'EER: {eer * 100.0} %')
-        print(f'Decidability: {d}')
+       # y_test_classes = utils.one_hot_encoding_to_classes(y_test)
+       # d, eer, thresholds = utils.calc_metrics(x_pred, y_test_classes, x_pred, y_test_classes)
+       # print(f'EER: {eer * 100.0} %')
+        #print(f'Decidability: {d}')
