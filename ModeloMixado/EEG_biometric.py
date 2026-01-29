@@ -24,7 +24,7 @@ from tensorflow.keras.callbacks import ReduceLROnPlateau, ModelCheckpoint ##
 import zipfile
 import os
 
-folder_path = '/media/work/mariapaula/IC/ModeloMixado/dataset/Dataset_CSV/'
+folder_path = '/media/work/mariapaula/IC/ModeloMixado/Dataset_CSV/'
 processed_data_path = '/media/work/mariapaula/IC/ModeloMixado/'
 
 if not os.path.exists(os.path.join(processed_data_path, 'results')):
