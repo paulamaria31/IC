@@ -250,7 +250,7 @@ class Logger(object):
         :param message:
         :return:
         """
-        with open(self.output_file, 'a', encoding='utf-8') as self.log:
+        with open(self.output_file, 'w', encoding='utf-8') as self.log:
             self.log.write(message)
         self.terminal.write(message)
 
