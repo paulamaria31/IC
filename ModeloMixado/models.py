@@ -11,11 +11,10 @@ from tensorflow.keras.regularizers import l2
 #Defino o learning rate por epocas
 # No arquivo models.py
 def scheduler(current_epoch, learning_rate):
-    # Começar baixo é o segredo para a Atenção não "explodir"
-    if current_epoch < 15:
+    if current_epoch < 10:
+        return 0.0001 # Taxa bem pequena para estabilizar a Atenção
+    elif current_epoch < 25:
         return 0.0005 
-    elif current_epoch < 30:
-        return 0.0001
     else:
         return 0.00005
 
@@ -279,38 +278,36 @@ def create_model_GRU(window_size, num_channels, num_classes, remove_last_layer=F
 def create_model_mixed(window_size, num_channels, num_classes, remove_last_layer=False):
     inputs = Input(shape=(window_size, num_channels))
 
-    # 1. Redução de dimensionalidade com CNN (Essencial para a Atenção funcionar)
-    # 1920 -> 480
-    x = Conv1D(64, 15, activation='relu', padding='same')(inputs)
+    # --- PARTE 1: CNN (Extração de Características e Limpeza) ---
+    # Reduzimos o sinal bruto para algo que a LSTM e a Atenção consigam "ler"
+    x = Conv1D(64, 15, padding='same', activation='relu')(inputs)
     x = BatchNormalization()(x)
-    x = MaxPooling1D(4)(x)
+    x = MaxPooling1D(4)(x) # 1920 -> 480
 
     x = Conv1D(128, 7, padding='same', activation='relu')(x)
     x = BatchNormalization()(x)
-    x = MaxPooling1D(4)(x)
+    x = MaxPooling1D(4)(x) # 480 -> 120
 
-    # 2. LSTM para contexto temporal inicial
-    x = LSTM(64, return_sequences=True)(x)
+    # --- PARTE 2: LSTM (Dependência Temporal Sequencial) ---
+    # return_sequences=True é OBRIGATÓRIO para conectar com a Autoatenção depois
+    x = LSTM(128, return_sequences=True)(x)
 
-    # 3. Camada de Autoatenção (Multi-Head Attention)
-    # Aqui a atenção foca nos pontos mais importantes do sinal já processado
-    attention_output = MultiHeadAttention(num_heads=8, key_dim=64)(x, x)
-    x = LayerNormalization()(attention_output + x) # Resíduo + Norm
+    # --- PARTE 3: AUTOATENÇÃO (Multi-Head Attention) ---
+    # Aqui o modelo aprende quais partes do sinal da LSTM são mais importantes para a tarefa
+    attention_output = MultiHeadAttention(num_heads=4, key_dim=128)(x, x)
+    x = LayerNormalization()(attention_output + x) # Conexão residual para evitar estagnação
 
-    # 4. Global Average Pooling em vez de Flatten direto
-    # Isso ajuda a evitar o overfitting que trava a acurácia
-    x = GlobalAveragePooling1D()(x)
-    
-    # 5. Classificação final
+    # --- FINALIZAÇÃO ---
+    x = GlobalAveragePooling1D()(x) # Resume a informação de tempo e atenção
     x = Dense(256, activation='relu')(x)
-    x = Dropout(0.3)(x)
+    x = Dropout(0.5)(x)
     
     if not remove_last_layer:
         outputs = Dense(num_classes, activation='softmax', name='FC4')(x)
     else:
         outputs = x 
 
-    return Model(inputs=inputs, outputs=outputs, name='Attention_EEG_Model')
+    return Model(inputs=inputs, outputs=outputs, name='CNN_LSTM_Attention_Hybrid')
 
 #Modelo com CNN e LSTM
 def create_model_sun(window_size, num_channels, num_classes, remove_last_layer=False):

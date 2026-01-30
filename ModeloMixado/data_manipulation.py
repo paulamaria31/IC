@@ -169,21 +169,19 @@ class DataGenerator(keras.utils.Sequence):
     def __getitem__(self, index):
         x, y = [] , []
         crop_positions = self.crop_positions[index*self.batch_size : (index+1)*self.batch_size]
-        # --- ADICIONE ESTE PRINT PARA VERIFICAR N_CLASSES ---
-        #print(f"DEBUG: n_classes configurado como: {self.n_classes}")
 
         for crop_position in crop_positions:
             file_index, crop_end = crop_position
             # Recorta a janela (Canais, Janela)
             sample = self.data[file_index][:, (crop_end-self.dim):crop_end]
             
-            # Ajusta para (Janela, Canais) para a Conv1D e Attention
+            # Ajusta para (Janela, Canais) para a Conv1D, LSTM e Attention
             sample = sample.T 
 
-            # Aumentar o ruído para evitar overfitting (valor sugerido: 0.05)
-            if self.train:
-                noise = np.random.normal(0, 0.01, sample.shape)
-                sample = sample + noise
+            # Bloco de ruído comentado para teste de sinal puro
+            # if self.train:
+            #     noise = np.random.normal(0, 0.01, sample.shape)
+            #     sample = sample + noise
 
             x.append(sample)
 
@@ -193,10 +191,10 @@ class DataGenerator(keras.utils.Sequence):
             label[self.classes_list[file_index]-1] = 1
             y.append(label)
 
-            # --- ADICIONE ESTE BLOCO PARA VER OS RÓTULOS NO TERMINAL ---
-            #if index == 0: # Imprime apenas para o primeiro lote de cada época
-             #print(f"DEBUG: Formato do primeiro rótulo do lote: {y[0]}")
-             #print(f"DEBUG: Lista de classes no lote (amostra): {[np.argmax(label) for label in y[:5]]}")
+        # --- MOVIDO PARA FORA DO LOOP PARA IMPRIMIR APENAS UMA VEZ POR LOTE ---
+        if index == 0: 
+            print(f"\nDEBUG: Formato do rótulo: {y[0]}")
+            print(f"DEBUG: Classes no primeiro lote: {[np.argmax(label) for label in y[:8]]}")
             
         return np.array(x).astype('float32'), np.array(y).astype('float32')
 
