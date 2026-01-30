@@ -182,7 +182,7 @@ class DataGenerator(keras.utils.Sequence):
 
             # Aumentar o ruído para evitar overfitting (valor sugerido: 0.05)
             if self.train:
-                noise = np.random.normal(0, 0.05, sample.shape)
+                noise = np.random.normal(0, 0.01, sample.shape)
                 sample = sample + noise
 
             x.append(sample)

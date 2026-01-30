@@ -302,8 +302,8 @@ def create_model_mixed(window_size, num_channels, num_classes, remove_last_layer
     x = GlobalAveragePooling1D()(x)
     
     # 5. Classificação final
-    x = Dense(128, activation='relu')(x)
-    x = Dropout(0.5)(x)
+    x = Dense(256, activation='relu')(x)
+    x = Dropout(0.3)(x)
     
     if not remove_last_layer:
         outputs = Dense(num_classes, activation='softmax', name='FC4')(x)
