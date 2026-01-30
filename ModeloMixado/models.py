@@ -276,50 +276,38 @@ def create_model_GRU(window_size, num_channels, num_classes, remove_last_layer=F
 
 #Modelo com CNN, LSTM, Transformers
 def create_model_mixed(window_size, num_channels, num_classes, remove_last_layer=False):
-    # Usamos a API funcional do Keras para facilitar a conexão da Autoatenção
     inputs = Input(shape=(window_size, num_channels))
 
-    # --- PARTE 1: LSTM (Captura de sequências temporais) ---
-    # Mantemos suas 5 camadas, mas return_sequences=True é vital para a Atenção
-    x = LSTM(128, return_sequences=True)(inputs)
-    x = LSTM(128, return_sequences=True)(x)
-    x = LSTM(128, return_sequences=True)(x)
-    x = LSTM(128, return_sequences=True)(x)
-    x = LSTM(128, return_sequences=True)(x)
+    # Reduzimos para 2 LSTMs (Suficiente para padrões temporais de EEG)
+    x = LSTM(64, return_sequences=True)(inputs)
+    x = LSTM(64, return_sequences=True)(x)
 
-    # --- PARTE 2: AUTOATENÇÃO (Multi-Head Attention) ---
-    # A atenção ajuda a focar nos frames do EEG onde os olhos abrem/fecham
-    attention_output = MultiHeadAttention(num_heads=4, key_dim=128)(x, x)
-    x = LayerNormalization()(attention_output + x) # Conexão residual para evitar estagnação
+    # Autoatenção em uma sequência mais limpa
+    attention_output = MultiHeadAttention(num_heads=4, key_dim=64)(x, x)
+    x = LayerNormalization()(attention_output + x)
 
-    # --- PARTE 3: CNN (Extração de características espaciais) ---
-    x = Conv1D(96, 11, activation='relu', name='Conv1')(x)
-    x = BatchNormalization(name='Norm1')(x)
-    x = MaxPooling1D(strides=4, name='Pool1')(x)
+    # CNNs para consolidar as características
+    x = Conv1D(64, 11, activation='relu')(x)
+    x = BatchNormalization()(x)
+    x = MaxPooling1D(strides=4)(x)
     
-    x = Conv1D(128, 9, activation='relu', name='Conv2')(x)
-    x = BatchNormalization(name='Norm2')(x)
-    x = MaxPooling1D(strides=2, name='Pool2')(x)
-    
-    x = Conv1D(256, 9, activation='relu', name='Conv3')(x) 
-    x = BatchNormalization(name='Norm3')(x)
-    x = MaxPooling1D(strides=2, name='Pool3')(x)
+    x = Conv1D(128, 9, activation='relu')(x)
+    x = BatchNormalization()(x)
+    x = MaxPooling1D(strides=2)(x)
 
-    # --- PARTE 4: CLASSIFICAÇÃO ---
     x = Flatten()(x)
-    x = Dense(4096, activation='relu', name='FC1')(x)
-    x = Dense(4096, activation='relu', name='FC2')(x)
-    x = Dense(256, name='FC3')(x)
-    x = BatchNormalization(name='Norm4')(x)
+    # Camadas Dense menores (512 e 256) para evitar overfitting e ganhar velocidade
+    x = Dense(512, activation='relu')(x)
+    x = Dense(256)(x)
+    x = BatchNormalization()(x)
 
     if not remove_last_layer:
-        x = Dropout(0.1, name='Drop')(x)
+        x = Dropout(0.3)(x)
         outputs = Dense(num_classes, activation='softmax', name='FC4')(x)
     else:
         outputs = x 
 
-    model = Model(inputs=inputs, outputs=outputs, name='CNN_LSTM_Attention_Integrated')
-    return model
+    return Model(inputs=inputs, outputs=outputs)
 
 #Modelo com CNN e LSTM
 def create_model_sun(window_size, num_channels, num_classes, remove_last_layer=False):
