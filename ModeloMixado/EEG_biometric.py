@@ -329,9 +329,9 @@ else:
 
     # Defino o data generator de treino e validacao
     training_generator = data_manipulation.DataGenerator(x_train_list, batch_size, window_size, offset,
-        num_channels, num_classes, train_tasks, 'train', split_ratio, processed_data_path, True)
+        num_channels, num_classes, train_tasks, 'train', split_ratio, processed_data_path, True, True)
     validation_generator = data_manipulation.DataGenerator(x_train_list, batch_size, window_size, offset,
-        num_channels, num_classes, train_tasks, 'validation', split_ratio, processed_data_path, True)
+        num_channels, num_classes, train_tasks, 'validation', split_ratio, processed_data_path, True, False)
 
     # Verifica se nao usou o nofit, ou seja se eu digitei --nofit vai usar o modelo com pesos prontos
     if(not args.nofit):

@@ -110,7 +110,7 @@ def get_crop_positions(dataset_type, signal_sizes, window_size, offset, split_ra
 #Data generator (Entender melhor depois)
 class DataGenerator(keras.utils.Sequence):
     def __init__(self, list_files, batch_size, dim, offset, n_channels,
-                n_classes, tasks, dataset_type, split_ratio, processed_data_path, shuffle=False):
+                n_classes, tasks, dataset_type, split_ratio, processed_data_path, train=True, shuffle=False):
         self.list_files = list_files
         self.batch_size = batch_size
         self.dim = dim
@@ -122,6 +122,7 @@ class DataGenerator(keras.utils.Sequence):
         self.split_ratio = split_ratio
         self.processed_data_path = processed_data_path
         self.shuffle = shuffle
+        self.train = train
 
         data = []
         classes_list = [] # Armazena se é Classe 1 ou 2
