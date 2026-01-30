@@ -167,34 +167,31 @@ class DataGenerator(keras.utils.Sequence):
     
     #Toda vez que o GPU precisa de um novo lote
     def __getitem__(self, index):
-        x, y = [], []
-        #Pega as coordenadas das janelas que pertencem ao lote
+        x, y = [] , []
         crop_positions = self.crop_positions[index*self.batch_size : (index+1)*self.batch_size]
 
-        #Inicia o recorte de cada janela do lote
         for crop_position in crop_positions:
             file_index, crop_end = crop_position
-            # Recorta a janela de sinal
+            # Recorta a janela (Canais, Janela)
             sample = self.data[file_index][:, (crop_end-self.dim):crop_end]
-            #Ajusta o formato
-            sample = sample.reshape(sample.shape[1], sample.shape[0])
+            
+            # Ajusta para (Janela, Canais) para a Conv1D e Attention
+            sample = sample.T 
 
-            #Ruido gaussiano
+            # Aumentar o ruído para evitar overfitting (valor sugerido: 0.05)
             if self.train:
-                # np.random.normal(média, desvio_padrão, formato)
-                noise = np.random.normal(0, 0.01, sample.shape)
+                noise = np.random.normal(0, 0.05, sample.shape)
                 sample = sample + noise
-            # --------------------------------------
 
             x.append(sample)
 
-            label = np.zeros((1, self.n_classes))
-            label[0, self.classes_list[file_index]-1] = 1
+            # Rótulo baseado na tarefa (Task 1 ou Task 2)
+            label = np.zeros((self.n_classes,))
+            # classes_list contém 1 ou 2, então subtraímos 1 para os índices 0 ou 1
+            label[self.classes_list[file_index]-1] = 1
             y.append(label)
             
-        x = np.asarray(x).astype('float32')
-        y = np.asarray(y).astype('float32').reshape(len(y), self.n_classes)
-        return (x, y)
+        return np.array(x).astype('float32'), np.array(y).astype('float32')
 
     #Ao final de cada epoca embaralha
     def on_epoch_end(self):
