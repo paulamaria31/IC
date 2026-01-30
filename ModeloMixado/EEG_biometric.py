@@ -348,7 +348,7 @@ else:
         # reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5, patience=50, min_lr=0.0001) ##
         # model_checkpoint = ModelCheckpoint(filepath='resnet1d_best_model.hdf5', monitor='loss',
         #                                     save_best_only=True) ##
-        early_stop = EarlyStopping(monitor='val_loss', patience=15, restore_best_weights=True)
+        early_stop = EarlyStopping(monitor='val_loss', patience=20, restore_best_weights=True)
         # Resultado
         results = model.fit(training_generator,
                             validation_data = validation_generator,
