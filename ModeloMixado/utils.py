@@ -1,5 +1,6 @@
 import sys
 import numpy as np
+import time
 import matplotlib.pyplot as plt
 from sklearn.metrics.pairwise import euclidean_distances
 # from pyedflib import EdfReader
