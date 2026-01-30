@@ -46,7 +46,7 @@ np.random.seed(1051)
 tf.random.set_seed(1051)
 
 # 132 amostras por vez e por 40 epocas e o learning rate 
-batch_size = 16                
+batch_size = 32                
 training_epochs = 40            
 initial_learning_rate = 0.01 
 
@@ -152,8 +152,7 @@ for task in test_tasks:
 
 # Define como a inteligencia artifical vai aprender e como o progresso sera salvo
 # SGD ajusta os pesos da rede neural, o tamanho do peso e o momentum ajuda o otimizador a não ficar em buracos pequenos e a convergir mais rapido 
-opt = SGD(learning_rate = initial_learning_rate, momentum = 0.9)
-# Cria callback, chama uma funcao que diminui a taxa de aprendizado
+opt = Adam(learning_rate=0.001)# Cria callback, chama uma funcao que diminui a taxa de aprendizado
 lr_scheduler = LearningRateScheduler(models.scheduler, verbose = 0)
 # Salva os pesos a cada 5 epócas nesse arquivo
 saver = models.SaveAtEpochEnd(5, '/media/work/mariapaula/IC/ModeloMixado/model_weights')

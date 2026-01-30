@@ -42,15 +42,8 @@ from sklearn.metrics.pairwise import euclidean_distances
 
 #         subject += 1
 
+#Mostra o progresso do processamento de dados
 def verbose_each_10_percent(count, data_amount, flag):
-    """
-    Auxiliar function for optional verbose on other functions. Returns the flag, possibly modified.
-
-    Parameters:
-        - count: current data index that was processed;
-        - data_amount: length of the list of data;
-        - flag: current state of the flag.
-    """
     if count == data_amount and flag < 10:
         print('100%')
         flag = 10
@@ -83,7 +76,8 @@ def verbose_each_10_percent(count, data_amount, flag):
         flag = 1
     
     return flag
-    
+
+#Converte o formato que a rede usa 
 def one_hot_encoding_to_classes(y_data):
     i = 0
     num_samples = y_data.shape[0]
@@ -98,16 +92,8 @@ def one_hot_encoding_to_classes(y_data):
     
     return arr
 
+#Calcula quantas janelas serao gerados dado o tamanho da janela e o offset
 def n_samples_with_sliding_window(start, end, window_size, offset):
-    """
-    Returns the number of samples in a signal, generated after applying a sliding window.
-
-    Parameters:
-        - start: starting position of the signal;
-        - end: ending position of the signal;
-        - window_size: size of the sliding window;
-        - offset: amount of samples the window will slide in each iteration.
-    """
     n_samples = 0
     i = start
 
@@ -125,22 +111,8 @@ def n_samples_with_sliding_window(start, end, window_size, offset):
 
     return n_samples
 
+#Calcula as metricas da biometria
 def calc_metrics(feature1, label1, feature2, label2, plot_det=True, path=None):
-    """
-    Calculates Decidability, Equal Error Rate (EER) and returns them, as well as the respective thresholds.
-
-    Parameters:
-        - feature1: one of the feature vectors;
-        - label1: labels of the feature1 vector;
-        - feature2: one of the feature vectors;
-        - label2: labels of the feature2 vector.
-    
-    Optional Parameters:
-        - plot_det: if set to True, plots the Detection Error Trade-Off (DET) graph. True by default;
-        - path: file path that will store the Detection Error Trade-Off (DET) graph in a png file. No file path 
-        is selected by default.
-    """
-
     resolu = 5000
 
     feature1 = feature1.T
@@ -231,6 +203,7 @@ def calc_metrics(feature1, label1, feature2, label2, plot_det=True, path=None):
 
     return d, eer, thresholds
 
+#Grava o que aparece no terminal no log_script
 class Logger(object):
     def __init__(self, output_file: str):
         self.terminal = sys.stdout

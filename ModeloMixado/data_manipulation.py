@@ -109,8 +109,10 @@ def get_crop_positions(dataset_type, signal_sizes, window_size, offset, split_ra
 
 #Data generator (Entender melhor depois)
 class DataGenerator(keras.utils.Sequence):
+    #Configuração inicial
     def __init__(self, list_files, batch_size, dim, offset, n_channels,
                 n_classes, tasks, dataset_type, split_ratio, processed_data_path, train=True, shuffle=False):
+        #Salva os parametros para serem usados
         self.list_files = list_files
         self.batch_size = batch_size
         self.dim = dim
@@ -127,41 +129,52 @@ class DataGenerator(keras.utils.Sequence):
         data = []
         classes_list = [] # Armazena se é Classe 1 ou 2
 
-        # No __init__ do DataGenerator:
+        #Inicia um loop pelas tarefas
         for task_idx, task in enumerate(self.tasks):
+            #Para cada tarefa percorre a lista de arquivos dos sujeitos
             for file_name in list_files:
+                #Monta o caminho exato aonde o arquivo csv foi salvo
                 path = f"{processed_data_path}processed_data/task{task}/{file_name}"
+                #Lê o sinal EEG
                 file_x = np.loadtxt(path, delimiter=';').astype('float32')
+                #Adiciona o sinal bruto na lista dat
                 data.append(file_x)
                 
                 # task_idx será 0 para a primeira tarefa (R01 - Olho Aberto) 
                 # e 1 para a segunda (R02 - Olho Fechado)
                 classes_list.append(task_idx + 1)
 
+        #Calcula o comprimento total de cada sinal
         signal_sizes = [signal.shape[1] for signal in data]
+        #Chama a funcao que cria uma lista de coordenadas
         self.crop_positions = get_crop_positions(self.dataset_type, signal_sizes, self.dim, self.offset, self.split_ratio)
         self.data = data
         self.classes_list = classes_list
+        #Chama a funcao para embaralhar
         self.on_epoch_end()
 
+    #Retorna os passos de uma epoca
     def __len__(self):
         return math.floor(len(self.crop_positions) / self.batch_size)
-
+    
+    #Toda vez que o GPU precisa de um novo lote
     def __getitem__(self, index):
         x, y = [], []
+        #Pega as coordenadas das janelas que pertencem ao lote
         crop_positions = self.crop_positions[index*self.batch_size : (index+1)*self.batch_size]
 
+        #Inicia o recorte de cada janela do lote
         for crop_position in crop_positions:
             file_index, crop_end = crop_position
             # Recorta a janela de sinal
             sample = self.data[file_index][:, (crop_end-self.dim):crop_end]
+            #Ajusta o formato
             sample = sample.reshape(sample.shape[1], sample.shape[0])
 
-            # --- ADICIONAR ESTE BLOCO PARA RUÍDO ---
+            #Ruido gaussiano
             if self.train:
                 # np.random.normal(média, desvio_padrão, formato)
-                # O valor 0.01 define a força do ruído; comece baixo.
-                noise = np.random.normal(0, 0.05, sample.shape)
+                noise = np.random.normal(0, 0.01, sample.shape)
                 sample = sample + noise
             # --------------------------------------
 
@@ -175,6 +188,7 @@ class DataGenerator(keras.utils.Sequence):
         y = np.asarray(y).astype('float32').reshape(len(y), self.n_classes)
         return (x, y)
 
+    #Ao final de cada epoca embaralha
     def on_epoch_end(self):
         if self.shuffle:
             random.shuffle(self.crop_positions)
