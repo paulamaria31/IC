@@ -50,34 +50,42 @@ def crop_data(data, data_tasks, num_classes, window_size, offset, split_ratio=1.
     if verbose == 1:
         print('Iniciando o recorte dos dados (Janelamento)...')
 
-    # 'data' contém a sequência [S1R1, S1R2, S2R1, S2R2...]
-    # Índices pares = R01 (Classe 1), Índices ímpares = R02 (Classe 2)
+    # 'data' contém a sequência carregada pelo loader: [S1R1, S1R2, S2R1, S2R2...]
     for idx, signal in enumerate(data):
+        # Lógica baseada na ordem de carregamento do loader.py:
+        # R01 sempre em índices 0, 2, 4... (pares)
+        # R02 sempre em índices 1, 3, 5... (ímpares)
         current_class = 1 if (idx % 2 == 0) else 2
         
         if split_ratio == 1.0:
+            # Caso não haja divisão para validação (ex: conjunto de teste)
             x_dataL, y_dataL = signal_cropping(x_dataL, y_dataL, signal, 
                                                window_size, offset, current_class, num_classes)
         else:
+            # Caso haja divisão entre treino e validação
             x_dataL, y_dataL, x_dataL_2, y_dataL_2 = signal_cropping(x_dataL, y_dataL, signal,
                                                                      window_size, offset, current_class, num_classes,
                                                                      split_ratio, x_dataL_2, y_dataL_2)
 
-    # Conversão para Numpy Array e Reshape para o formato da Rede Neural (CNN/LSTM)
+    # Conversão para Numpy Array e ajuste de formato para a rede neural
     x_data = np.asarray(x_dataL).astype('float32')
     y_data = np.asarray(y_dataL).astype('float32')
     
-    # Reshape: (N, Canais, Janela) -> (N, Janela, Canais)
+    # Reshape para o formato esperado (Ex: Conv1D/LSTM): (Amostras, Comprimento da Janela, Canais)
+    # Originalmente o cropping gera (N, Canais, Janela), então transpomos os eixos
     x_data = x_data.reshape(x_data.shape[0], x_data.shape[2], x_data.shape[1])
     y_data = y_data.reshape(y_data.shape[0], y_data.shape[2])
 
     if split_ratio == 1.0:
         return x_data, y_data
     else:
+        # Processamento similar para os dados de validação (x_data_2)
         x_data_2 = np.asarray(x_dataL_2).astype('float32')
         y_data_2 = np.asarray(y_dataL_2).astype('float32')
+        
         x_data_2 = x_data_2.reshape(x_data_2.shape[0], x_data_2.shape[2], x_data_2.shape[1])
         y_data_2 = y_data_2.reshape(y_data_2.shape[0], y_data_2.shape[2])
+        
         return x_data, y_data, x_data_2, y_data_2
 
 #Define em qual indice o conjunto de treinamento termina para que o conjunto de validação comece sem que haja sobreposicao

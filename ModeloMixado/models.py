@@ -279,31 +279,34 @@ def create_model_GRU(window_size, num_channels, num_classes, remove_last_layer=F
 def create_model_mixed(window_size, num_channels, num_classes, remove_last_layer=False):
     inputs = Input(shape=(window_size, num_channels))
 
-    x = LSTM(64, return_sequences=True)(inputs)
-    x = Conv1D(96, (11), activation='relu', padding='same')(x)
+    # 1. Redução de dimensionalidade com CNN (Essencial para a Atenção funcionar)
+    # 1920 -> 480
+    x = Conv1D(64, 15, activation='relu', padding='same')(inputs)
     x = BatchNormalization()(x)
-    x = MaxPooling1D(strides=4)(x) # Reduz a sequência temporal para 480 pontos
+    x = MaxPooling1D(4)(x)
 
+    # 2. LSTM para contexto temporal inicial
+    x = LSTM(64, return_sequences=True)(x)
+
+    # 3. Camada de Autoatenção (Multi-Head Attention)
+    # Aqui a atenção foca nos pontos mais importantes do sinal já processado
     attention_output = MultiHeadAttention(num_heads=4, key_dim=64)(x, x)
-    x = LayerNormalization()(attention_output + x)
+    x = LayerNormalization()(attention_output + x) # Resíduo + Norm
 
-    x = Conv1D(128, (9), activation='relu', padding='same')(x)
-    x = BatchNormalization()(x)
-    x = MaxPooling1D(strides=2)(x)
+    # 4. Global Average Pooling em vez de Flatten direto
+    # Isso ajuda a evitar o overfitting que trava a acurácia
+    x = GlobalAveragePooling1D()(x)
     
-    x = Flatten()(x)
-    x = Dense(64, activation='relu', kernel_regularizer=l2(0.01))(x)
-    x = Dropout(0.5)(x) 
-    x = Dense(16, name='FC3', kernel_regularizer=l2(0.01))(x)
-    x = BatchNormalization()(x)
-
+    # 5. Classificação final
+    x = Dense(64, activation='relu')(x)
+    x = Dropout(0.5)(x)
+    
     if not remove_last_layer:
-        x = Dropout(0.5)(x) # Dropout final moderado
         outputs = Dense(num_classes, activation='softmax', name='FC4')(x)
     else:
-        outputs = x # Modo de Verificação (Extração de Features)
+        outputs = x 
 
-    return Model(inputs=inputs, outputs=outputs, name='Mixed_Attention_Model')
+    return Model(inputs=inputs, outputs=outputs, name='Attention_EEG_Model')
 
 #Modelo com CNN e LSTM
 def create_model_sun(window_size, num_channels, num_classes, remove_last_layer=False):
