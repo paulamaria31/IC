@@ -169,6 +169,8 @@ class DataGenerator(keras.utils.Sequence):
     def __getitem__(self, index):
         x, y = [] , []
         crop_positions = self.crop_positions[index*self.batch_size : (index+1)*self.batch_size]
+        # --- ADICIONE ESTE PRINT PARA VERIFICAR N_CLASSES ---
+        print(f"DEBUG: n_classes configurado como: {self.n_classes}")
 
         for crop_position in crop_positions:
             file_index, crop_end = crop_position
@@ -190,6 +192,11 @@ class DataGenerator(keras.utils.Sequence):
             # classes_list contém 1 ou 2, então subtraímos 1 para os índices 0 ou 1
             label[self.classes_list[file_index]-1] = 1
             y.append(label)
+
+            # --- ADICIONE ESTE BLOCO PARA VER OS RÓTULOS NO TERMINAL ---
+            if index == 0: # Imprime apenas para o primeiro lote de cada época
+             print(f"DEBUG: Formato do primeiro rótulo do lote: {y[0]}")
+             print(f"DEBUG: Lista de classes no lote (amostra): {[np.argmax(label) for label in y[:5]]}")
             
         return np.array(x).astype('float32'), np.array(y).astype('float32')
 

@@ -294,7 +294,7 @@ else:
     test_content = preprocessing.filter_data(test_content, band_pass_2, sample_frequency, filter_order, filter_type)
 
     # Normalizo
-    test_content = preprocessing.normalize_data(test_content, 'sun')
+    test_content = preprocessing.normalize_data(test_content, 'each_channel')
 
     # Janelamento
     x_test, y_test = data_manipulation.crop_data(test_content, test_tasks, num_classes, window_size, window_size)
@@ -314,7 +314,7 @@ else:
             train_content = preprocessing.filter_data(train_content, band_pass_2, sample_frequency, filter_order, filter_type)
 
             # Normalizo
-            train_content = preprocessing.normalize_data(train_content, 'sun')
+            train_content = preprocessing.normalize_data(train_content, 'each_channel')
         
             # Percorro cada individuo da tarefa e transformo em arquivos fisicos
             list_csv = []

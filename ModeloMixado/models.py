@@ -285,12 +285,16 @@ def create_model_mixed(window_size, num_channels, num_classes, remove_last_layer
     x = BatchNormalization()(x)
     x = MaxPooling1D(4)(x)
 
+    x = Conv1D(128, 7, padding='same', activation='relu')(x)
+    x = BatchNormalization()(x)
+    x = MaxPooling1D(4)(x)
+
     # 2. LSTM para contexto temporal inicial
     x = LSTM(64, return_sequences=True)(x)
 
     # 3. Camada de Autoatenção (Multi-Head Attention)
     # Aqui a atenção foca nos pontos mais importantes do sinal já processado
-    attention_output = MultiHeadAttention(num_heads=4, key_dim=64)(x, x)
+    attention_output = MultiHeadAttention(num_heads=8, key_dim=64)(x, x)
     x = LayerNormalization()(attention_output + x) # Resíduo + Norm
 
     # 4. Global Average Pooling em vez de Flatten direto
@@ -298,7 +302,7 @@ def create_model_mixed(window_size, num_channels, num_classes, remove_last_layer
     x = GlobalAveragePooling1D()(x)
     
     # 5. Classificação final
-    x = Dense(64, activation='relu')(x)
+    x = Dense(128, activation='relu')(x)
     x = Dropout(0.5)(x)
     
     if not remove_last_layer:
