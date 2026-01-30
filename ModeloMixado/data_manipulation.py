@@ -192,9 +192,9 @@ class DataGenerator(keras.utils.Sequence):
             y.append(label)
 
         # --- MOVIDO PARA FORA DO LOOP PARA IMPRIMIR APENAS UMA VEZ POR LOTE ---
-        if index == 0: 
-            print(f"\nDEBUG: Formato do rótulo: {y[0]}")
-            print(f"DEBUG: Classes no primeiro lote: {[np.argmax(label) for label in y[:8]]}")
+        #if index == 0: 
+          #  print(f"\nDEBUG: Formato do rótulo: {y[0]}")
+           # print(f"DEBUG: Classes no primeiro lote: {[np.argmax(label) for label in y[:8]]}")
             
         return np.array(x).astype('float32'), np.array(y).astype('float32')
 
