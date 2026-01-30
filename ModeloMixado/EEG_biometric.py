@@ -17,6 +17,7 @@ from pathlib import Path
 from tensorflow.keras.callbacks import LearningRateScheduler
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.optimizers import SGD
+from tensorflow.keras.optimizers import Adam
 from numpy import savetxt, loadtxt
 
 from tensorflow.keras.optimizers import Adam ##
