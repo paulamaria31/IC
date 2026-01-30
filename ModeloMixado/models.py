@@ -9,15 +9,16 @@ from tensorflow.keras.callbacks import Callback
 from tensorflow.keras.regularizers import l2
 
 #Defino o learning rate por epocas
+# No arquivo models.py
 def scheduler(current_epoch, learning_rate):
-    # Mantém 0.01 por mais tempo (até a época 20) para dar "tração"
-    if current_epoch < 25:
-        return 0.01
-    # Reduz para 0.005 para refinar
-    elif current_epoch < 35:
-        return 0.005
-    else:
+    # Começamos com um valor bem menor para estabilizar o aprendizado
+    if current_epoch < 20:
         return 0.001
+    # Reduzimos ainda mais conforme o treino avança
+    elif current_epoch < 35:
+        return 0.0005
+    else:
+        return 0.0001
 
 #Mostra o valor do learning rate atual
 def get_lr_metric(optimizer):
