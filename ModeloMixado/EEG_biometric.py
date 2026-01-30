@@ -304,7 +304,7 @@ else:
             train_content, test_content = loader.load_data(folder_path, [task], [], 'csv', num_classes)
 
             # Aplica os filtros
-            train_content = preprocessing.filter_data(train_content, band_pass_3, sample_frequency, filter_order, filter_type)
+            train_content = preprocessing.filter_data(train_content, band_pass_2, sample_frequency, filter_order, filter_type)
 
             # Normalizo
             train_content = preprocessing.normalize_data(train_content, 'sun')

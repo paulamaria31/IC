@@ -161,7 +161,7 @@ class DataGenerator(keras.utils.Sequence):
             if self.train:
                 # np.random.normal(média, desvio_padrão, formato)
                 # O valor 0.01 define a força do ruído; comece baixo.
-                noise = np.random.normal(0, 0.08, sample.shape)
+                noise = np.random.normal(0, 0.05, sample.shape)
                 sample = sample + noise
             # --------------------------------------
 
