@@ -231,31 +231,18 @@ def calc_metrics(feature1, label1, feature2, label2, plot_det=True, path=None):
     return d, eer, thresholds
 
 class Logger(object):
-    """
-    Direct all output from terminal to an output file.
-    """
-
     def __init__(self, output_file: str):
-        """
-        Constructor.
-        :param output_file: the file which the console log will be written.
-        """
         self.terminal = sys.stdout
         self.output_file = output_file
-        self.log = None
+        # Abre com 'w' aqui no início para LIMPAR o arquivo do treino anterior
+        with open(self.output_file, 'w', encoding='utf-8') as f:
+            f.write(f"--- Início do Log: {time.ctime()} ---\n")
 
     def write(self, message: str):
-        """
-        Append a message from the console log to the file.
-        :param message:
-        :return:
-        """
-        with open(self.output_file, 'w', encoding='utf-8') as self.log:
+        # Aqui usamos 'a' para que ele ACUMULE as mensagens do treino atual
+        with open(self.output_file, 'a', encoding='utf-8') as self.log:
             self.log.write(message)
         self.terminal.write(message)
 
     def flush(self):
-        # this flush method is needed for python 3 compatibility.
-        # this handles the flush command by doing nothing.
-        # you might want to specify some extra behavior here.
         pass
