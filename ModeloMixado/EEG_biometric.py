@@ -47,7 +47,7 @@ np.random.seed(1051)
 tf.random.set_seed(1051)
 
 # 132 amostras por vez e por 40 epocas e o learning rate 
-batch_size = 32                
+batch_size = 16                
 training_epochs = 40            
 initial_learning_rate = 0.001
 
