@@ -280,7 +280,7 @@ def create_model_mixed(window_size, num_channels, num_classes, remove_last_layer
 
     # Reduzimos para 2 LSTMs (Suficiente para padrões temporais de EEG)
     x = LSTM(64, return_sequences=True)(inputs)
-    x = LSTM(64, return_sequences=True)(x)
+    x = MaxPooling1D(pool_size=4)(x)
 
     # Autoatenção em uma sequência mais limpa
     attention_output = MultiHeadAttention(num_heads=4, key_dim=64)(x, x)
