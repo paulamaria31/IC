@@ -179,9 +179,9 @@ class DataGenerator(keras.utils.Sequence):
             sample = sample.T 
 
             # Bloco de ruído comentado para teste de sinal puro
-            # if self.train:
-            #     noise = np.random.normal(0, 0.01, sample.shape)
-            #     sample = sample + noise
+            if self.train:
+                noise = np.random.normal(0, 0.08, sample.shape)
+                sample = sample + noise
 
             x.append(sample)
 

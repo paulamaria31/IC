@@ -294,7 +294,7 @@ else:
     test_content = preprocessing.filter_data(test_content, band_pass_2, sample_frequency, filter_order, filter_type)
 
     # Normalizo
-    test_content = preprocessing.normalize_data(test_content, 'each_channel')
+    test_content = preprocessing.normalize_data(test_content, 'sun')
 
     # Janelamento
     x_test, y_test = data_manipulation.crop_data(test_content, test_tasks, num_classes, window_size, window_size)
@@ -314,14 +314,14 @@ else:
             train_content = preprocessing.filter_data(train_content, band_pass_2, sample_frequency, filter_order, filter_type)
 
             # Normalizo
-            train_content = preprocessing.normalize_data(train_content, 'each_channel')
+            train_content = preprocessing.normalize_data(train_content, 'sun')
         
             # Percorro cada individuo da tarefa e transformo em arquivos fisicos
             list_csv = []
             for index in range(0, len(train_content)):
                 data = train_content[index]
                 string = 'x_subject_' + str(index+1)
-                savetxt(processed_data_path + 'processed_data/task' + str(task) + '/' + string + '.csv', data, fmt='%f', delimiter=';')
+                savetxt(processed_data_path + 'processed_data/task' + str(task) + '/' + string + '.csv', data, fmt='%.18e', delimiter=';')
                 print(processed_data_path + 'processed_data/task' + str(task) + '/' + string + '.csv was saved.')
                 list_csv.append(string+'.csv')
                 
@@ -342,11 +342,11 @@ else:
 
     # Verifica se nao usou o nofit, ou seja se eu digitei --nofit vai usar o modelo com pesos prontos
     if(not args.nofit):
-        model = models.create_model_mixed(window_size, num_channels, num_classes)
+        model = models.create_model_mixedDG(window_size, num_channels, num_classes)
         # model = models.create_model_causal(window_size, num_channels, num_classes) ##
         model.summary()
 
-        # model.load_weights('model_weights.h5', by_name=True) ###### When the connection breaks ######
+        model.load_weights('model_weights.h5', by_name=True) ###### When the connection breaks ######
 
         model.compile(opt, loss='categorical_crossentropy', metrics=['accuracy'])
 

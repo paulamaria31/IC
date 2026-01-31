@@ -309,6 +309,40 @@ def create_model_mixed(window_size, num_channels, num_classes, remove_last_layer
 
     return Model(inputs=inputs, outputs=outputs)
 
+def create_model_mixedDG(window_size, num_channels, num_classes, remove_last_layer=False):
+    inputs = Input(shape=(window_size, num_channels))
+
+    # Reduzimos para 2 LSTMs (Suficiente para padrões temporais de EEG)
+    x = LSTM(64, return_sequences=True)(inputs)
+    x = MaxPooling1D(pool_size=4)(x)
+
+    # Autoatenção em uma sequência mais limpa
+    attention_output = MultiHeadAttention(num_heads=4, key_dim=64)(x, x)
+    x = LayerNormalization()(attention_output + x)
+
+    # CNNs para consolidar as características
+    x = Conv1D(64, 11, activation='relu')(x)
+    x = BatchNormalization()(x)
+    x = MaxPooling1D(strides=4)(x)
+    
+    x = Conv1D(128, 9, activation='relu')(x)
+    x = BatchNormalization()(x)
+    x = MaxPooling1D(strides=2)(x)
+
+    x = Flatten()(x)
+    # Camadas Dense menores (512 e 256) para evitar overfitting e ganhar velocidade
+    x = Dense(512, activation='relu')(x)
+    x = Dense(256)(x)
+    x = BatchNormalization()(x)
+
+    if not remove_last_layer:
+        x = Dropout(0.3)(x)
+        outputs = Dense(num_classes, activation='softmax', name='FC4')(x)
+    else:
+        outputs = x 
+
+    return Model(inputs=inputs, outputs=outputs)
+
 #Modelo com CNN e LSTM
 def create_model_sun(window_size, num_channels, num_classes, remove_last_layer=False):
 
