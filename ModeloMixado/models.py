@@ -297,12 +297,13 @@ def create_model_mixed(window_size, num_channels, num_classes, remove_last_layer
 
     x = Flatten()(x)
     # Camadas Dense menores (512 e 256) para evitar overfitting e ganhar velocidade
-    x = Dense(512, activation='relu')(x)
-    x = Dense(256)(x)
+    x = Dense(512, activation='relu', kernel_regularizer=l2(0.01))(x)
+    x = Dropout(0.3)(x)
+    x = Dense(256, kernel_regularizer=l2(0.01))(x)
     x = BatchNormalization()(x)
 
     if not remove_last_layer:
-        x = Dropout(0.3)(x)
+        x = Dropout(0.5)(x)
         outputs = Dense(num_classes, activation='softmax', name='FC4')(x)
     else:
         outputs = x 
