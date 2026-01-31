@@ -346,7 +346,7 @@ else:
         # model = models.create_model_causal(window_size, num_channels, num_classes) ##
         model.summary()
 
-        model.load_weights('model_weights.h5', by_name=True) ###### When the connection breaks ######
+        #model.load_weights('model_weights.h5', by_name=True) ###### When the connection breaks ######
 
         model.compile(opt, loss='categorical_crossentropy', metrics=['accuracy'])
 
