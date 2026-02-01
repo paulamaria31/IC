@@ -17,9 +17,8 @@ def scheduler(epoch, lr):
 
 #Mostra o valor do learning rate atual
 def get_lr_metric(optimizer):
-
     def lr(y_true, y_pred):
-        return optimizer.lr
+        return optimizer.learning_rate
 
     return lr
 
