@@ -10,13 +10,10 @@ from tensorflow.keras.regularizers import l2
 
 #Defino o learning rate por epocas
 # No arquivo models.py
-def scheduler(current_epoch, learning_rate):
-    if current_epoch < 10:
-        return 0.0001 # Taxa bem pequena para estabilizar a Atenção
-    elif current_epoch < 25:
-        return 0.0005 
-    else:
-        return 0.00005
+def scheduler(epoch, lr):
+    if epoch < 10: return 0.001
+    if epoch < 20: return 0.0001
+    return 0.00001 # Trava o aprendizado antes do overfitting começar
 
 #Mostra o valor do learning rate atual
 def get_lr_metric(optimizer):

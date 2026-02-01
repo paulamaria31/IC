@@ -187,7 +187,7 @@ if(not args.datagen):
         model.summary()
 
         # Compilacao do modelo usando usando optimizador, a funcao de perda, e a metrica que eu quero
-        model.compile(opt, loss='categorical_crossentropy', metrics=['accuracy'])
+        model.compile( optimizer=opt, loss=tf.keras.losses.CategoricalCrossentropy(label_smoothing=0.1), metrics=['accuracy', models.get_lr_metric(opt)])
 
         # Captura o horario exato antes de começar o treinamento
         fit_begin = time.time()

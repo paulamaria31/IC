@@ -19,7 +19,7 @@ def signal_cropping(x_data, y_data, content, window_size, offset, num_subject, n
         # Processamento da primeira parte (Treino)
         while i <= content.shape[1] * split_ratio:
             arr = content[: , (i-window_size):i]
-            noise = np.random.normal(0, 0.20, arr.shape) 
+            noise = np.random.normal(0, 0.30, arr.shape) 
             arr = arr + noise
             x_data.append(arr)
 
