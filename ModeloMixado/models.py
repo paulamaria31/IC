@@ -278,16 +278,13 @@ def create_model_GRU(window_size, num_channels, num_classes, remove_last_layer=F
 def create_model_mixed(window_size, num_channels, num_classes, remove_last_layer=False):
     inputs = Input(shape=(window_size, num_channels))
 
-    # Reduzimos para 2 LSTMs (Suficiente para padrões temporais de EEG)
-    x = LSTM(64, return_sequences=True)(inputs)
-    x = MaxPooling1D(pool_size=4)(x)
+    x = LSTM(128, return_sequences=True)(inputs) # Aumentamos para 128 unidades
+    x = MaxPooling1D(pool_size=4)(x) # Reduz a sequência para a atenção não pesar
 
-    # Autoatenção em uma sequência mais limpa
-    attention_output = MultiHeadAttention(num_heads=4, key_dim=64)(x, x)
+    attention_output = MultiHeadAttention(num_heads=8, key_dim=128)(x, x) # Mais cabeças para captar ritmos Alpha/Beta
     x = LayerNormalization()(attention_output + x)
 
-    # CNNs para consolidar as características
-    x = Conv1D(64, 11, activation='relu')(x)
+    x = Conv1D(96, 11, activation='relu')(x)
     x = BatchNormalization()(x)
     x = MaxPooling1D(strides=4)(x)
     
@@ -295,11 +292,15 @@ def create_model_mixed(window_size, num_channels, num_classes, remove_last_layer
     x = BatchNormalization()(x)
     x = MaxPooling1D(strides=2)(x)
 
+    x = Conv1D(256, 9, activation='relu')(x) # Adicionamos a 3ª camada Conv que faltava
+    x = BatchNormalization()(x)
+    x = MaxPooling1D(strides=2)(x)
+
     x = Flatten()(x)
-    # Camadas Dense menores (512 e 256) para evitar overfitting e ganhar velocidade
-    x = Dense(512, activation='relu', kernel_regularizer=l2(0.01))(x)
-    x = Dropout(0.3)(x)
-    x = Dense(256, kernel_regularizer=l2(0.01))(x)
+    x = Dense(2048, activation='relu', kernel_regularizer=l2(0.01))(x)
+    x = Dropout(0.5)(x)
+    
+    x = Dense(1024, activation='relu', kernel_regularizer=l2(0.01))(x)
     x = BatchNormalization()(x)
 
     if not remove_last_layer:
