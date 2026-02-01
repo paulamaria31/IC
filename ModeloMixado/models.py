@@ -278,7 +278,8 @@ def create_model_GRU(window_size, num_channels, num_classes, remove_last_layer=F
 def create_model_mixed(window_size, num_channels, num_classes, remove_last_layer=False):
     inputs = Input(shape=(window_size, num_channels))
 
-    x = LSTM(128, return_sequences=True)(inputs) # Aumentamos para 128 unidades
+    x = LSTM(128, return_sequences=True, kernel_regularizer=l2(0.01), 
+             recurrent_regularizer=l2(0.01))(inputs) # Aumentamos para 128 unidades
     x = MaxPooling1D(pool_size=4)(x) # Reduz a sequência para a atenção não pesar
 
     attention_output = MultiHeadAttention(num_heads=8, key_dim=128)(x, x) # Mais cabeças para captar ritmos Alpha/Beta
@@ -297,10 +298,10 @@ def create_model_mixed(window_size, num_channels, num_classes, remove_last_layer
     x = MaxPooling1D(strides=2)(x)
 
     x = Flatten()(x)
-    x = Dense(2048, activation='relu', kernel_regularizer=l2(0.01))(x)
+    x = Dense(512, activation='relu', kernel_regularizer=l2(0.02))(x)
     x = Dropout(0.5)(x)
     
-    x = Dense(1024, activation='relu', kernel_regularizer=l2(0.01))(x)
+    x = Dense(256, activation='relu', kernel_regularizer=l2(0.02))(x)
     x = BatchNormalization()(x)
 
     if not remove_last_layer:
